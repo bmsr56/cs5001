@@ -11,14 +11,36 @@ gamma = 0.8 # discount rate
 Qnext = [[[0 for k in range(4)] for j in range(10)] for i in range(10)]
 Qprev = [[[0 for k in range(4)] for j in range(10)] for i in range(10)]
 
-up = 0
-down = 1   
-left = 2
-right = 3
-
-directionModifiers = {
-    0: (-1, 0) 
+cake = {(6,7)}
+donut = {(2,5)}
+fire = {(4,2)}
+monster = {(7, 3)}
+walls = {
+    (3,2),
+    (3,3),
+    (4,5),
+    (4,6),
+    (5,5),
+    (6,3),
+    (6,4),
+    (6,5),        
 }
+for i in range(10):
+    walls.add((0, i))
+    walls.add((9, i))
+    walls.add((i, 0))
+    walls.add((i, 9))
+obstacles = cake.union(donut, fire, monster, walls)
+
+directionModifier = {
+    0: (-1, 0), # up
+    1: (1, 0), # down
+    2: (0, -1), # left
+    3: (0, 1) # right
+}
+
+def move(location, direction):
+    return tuple(x + y for x, y in zip(location, global directionModifier[direction]))
 
 def printValues(values):
     print('+-------+-------+-------+-------+-------+-------+-------+-------+')
@@ -35,17 +57,25 @@ def ValueIterate(n):
         # for each valid r,c in grid (8x8 to avoid starting on a wall)
         for r in range(1, 9):
             for c in range(1, 9):
-                # for each each action (assumiug always 4)
-                for a in range(4):    
+                # make sure we are not starting on an obstacle
+                if (r, c) in global obstacles:
+                    continue
+                # for each new location from each action (assumiug always 4), get to the new r'c'
+                for initial_action in range(4):    
                     valtmp = 0.0
-                    for 
+                    # generate locations
+                    for second_action in range(3):
+                        valtmp += Prob(location, action, newLocation) * Value(newLocation)
+                        
 
 
 
 
-            # for each newLocation reachable after action a (3 actions, cant go back) 
-                valtmp += Prob(location, action, newLocation) * Value(newLocation)
-            Qnext[][][] = ExpReward(location, action) + gamma * valtmp
+
+                    newLocation = move(a)
+
+
+            global Qnext[][][] = ExpReward(location, action) + gamma * valtmp
 
     return
 
@@ -53,6 +83,13 @@ def Prob(location, action, newLocation):
     """ params:
         returns: the probability of reaching newLocation from location if action is taken
     """
+    p = 0.09
+    if action == 0 or 1:
+        p = 0.82
+    if action == 2 or 3:
+        p = 0.82
+
+
     return
 
 def Value(location):
@@ -77,42 +114,28 @@ def Reward(location):
         returns: reward value
     """
     res = 0.0
-    cake = {(6,7)}
-    donut = {(2,5)}
-    fire = {(4,2)}
-    monster = {(7, 3)}
-    walls = {
-        (3,2),
-        (3,3),
-        (4,5),
-        (4,6),
-        (5,5),
-        (6,3),
-        (6,4),
-        (6,5),        
-    }
+    
 
-    if location in cake:
-        res = 10.0
-    elif location in donut:
+    if location in global cake:
+        res = donut
+    elif location in global donut:
         res = 3.0
-    elif location in fire:
+    elif location in global fire:
         res = -5.0
-    elif location in monster:
+    elif location in global monster:
         res = -10.0
-    elif (location in walls # checks for walls
-            or location[0] in {0, 9}
-            or location[1] in {0, 9}):
+    elif location in global walls:
         res = -1.0
     else:
         print('+++++ Error in Reward +++++')
-
+        return
     return res
 
 def GetPolicy(location):
     """ Accepts: <r,c> location tuple
         Returns: action
     """
+
     return
 
 def main():
