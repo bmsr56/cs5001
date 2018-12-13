@@ -3,7 +3,7 @@
 # 12-12-2018
 
 import numpy as np
-
+from tabulate import tabulate
 
 
 # GLOBAL
@@ -31,11 +31,12 @@ for i in range(10):
     walls.add((9, i))
     walls.add((i, 0))
     walls.add((i, 9))
+
 obstacles = cake.union(donut, fire, monster, walls)
 
 directionModifier = {
     0: (-1, 0), # up
-    1: (0, 1) # right
+    1: (0, 1), # right
     2: (1, 0), # down
     3: (0, -1), # left
 }
@@ -44,7 +45,8 @@ directions = [0, 1, 2, 3] #urdl
 
 
 def move(location, direction):
-    return tuple(x + y for x, y in zip(location, global directionModifier[direction]))
+    global directionModifier
+    return tuple(x + y for x, y in zip(location, directionModifier[direction]))
 
 def printValues(values):
     print('+-------+-------+-------+-------+-------+-------+-------+-------+')
@@ -58,6 +60,9 @@ def ValueIterate(n):
         returns: valtmp, a real number
     """
     for _ in range(n):
+        global obstacles
+        global Qnext
+        global Qprev
         # for each valid r,c in grid (8x8 to avoid starting on a wall)
         for r in range(1, 9):
 
@@ -68,7 +73,7 @@ def ValueIterate(n):
                 valtmp = 0.0
 
                 # make sure we are not starting on an obstacle
-                if (r, c) in global obstacles:
+                if (r, c) in obstacles:
                     continue
 
                 # for each new location from each action, generate all r'c' states
@@ -87,8 +92,9 @@ def ValueIterate(n):
                         location_prime = move(location, p_action)
                         valtmp += Prob(action, p_action) * Value(location_prime)
 
-                    global Qnext[r][c][action] = ExpReward(location, action, possible_actions) + gamma * valtmp
-
+                    Qnext[r][c][action] = ExpReward(location, action, possible_actions) + gamma * valtmp
+        Qprev = Qnext
+    
     return
 
 def Prob(action, p_action):
@@ -123,17 +129,21 @@ def Reward(location):
         returns: reward value
     """
     res = 0.0
+    global cake
+    global donut
+    global fire
+    global monster
+    global walls
 
-
-    if location in global cake:
-        res = donut
-    elif location in global donut:
+    if location in cake:
+        res = 10.0
+    elif location in donut:
         res = 3.0
-    elif location in global fire:
+    elif location in fire:
         res = -5.0
-    elif location in global monster:
+    elif location in monster:
         res = -10.0
-    elif location in global walls:
+    elif location in walls:
         res = -1.0
     else:
         print('+++++ Error in Reward +++++')
@@ -144,14 +154,43 @@ def GetPolicy(location):
     """ Accepts: <r,c> location tuple
         Returns: action
     """
+    global Qprev
     v = -1337
     for r in range(1,9):
         for c in range(1,9):        
             for a in range(4):
-                if global Qprev[r][c][a] > v:
+                if Qprev[r][c][a] > v:
                     policy_action = a
                     v = Qprev[r][c][a]
     return policy_action
+
+def printThatIsh(qtable):
+    global cake
+    global donut
+    global fire
+    global monster
+    global walls
+
+    rowsToPrint = []
+    for r in range(1, 9):
+        tmpRow = []
+        for c in range(1, 9):
+            if (r, c) in cake:
+                tmpRow.append('CAKE')
+            elif (r, c) in donut:
+                tmpRow.append('DONUT')
+            elif (r, c) in monster:
+                tmpRow.append('DEMON')
+            elif (r, c) in walls:
+                tmpRow.append('XXX')
+            elif (r, c) in fire:
+                tmpRow.append('FIRE')
+            else:
+                tmpRow.append(max(qtable[r][c]))
+        rowsToPrint.append(tmpRow)
+    print(tabulate(rowsToPrint))
+
+
 
 def main():
     count = 0
@@ -160,14 +199,13 @@ def main():
     while iterations > 0:
         ValueIterate(iterations)
         count = count + iterations
-        # print count
-        # print vals
-        # print prompt
+        print('Count: {}'.format(count))
+        printThatIsh(global Qnext)
         iterations = input()
 
 
 
-    print(Qprev)
+    # print(Qprev)
     return
 
 if __name__ == '__main__':
