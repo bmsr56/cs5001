@@ -8,6 +8,7 @@ import numpy as np
 
 # GLOBAL
 gamma = 0.8 # discount rate
+# Actions are stored in this order: UP RIGHT DOWN LEFT
 Qnext = [[[0 for k in range(4)] for j in range(10)] for i in range(10)]
 Qprev = [[[0 for k in range(4)] for j in range(10)] for i in range(10)]
 
@@ -23,7 +24,7 @@ walls = {
     (5,5),
     (6,3),
     (6,4),
-    (6,5),        
+    (6,5),
 }
 for i in range(10):
     walls.add((0, i))
@@ -34,10 +35,13 @@ obstacles = cake.union(donut, fire, monster, walls)
 
 directionModifier = {
     0: (-1, 0), # up
-    1: (1, 0), # down
-    2: (0, -1), # left
-    3: (0, 1) # right
+    1: (0, 1) # right
+    2: (1, 0), # down
+    3: (0, -1), # left
 }
+
+directions = [0, 1, 2, 3] #urdl
+
 
 def move(location, direction):
     return tuple(x + y for x, y in zip(location, global directionModifier[direction]))
@@ -56,39 +60,43 @@ def ValueIterate(n):
     for _ in range(n):
         # for each valid r,c in grid (8x8 to avoid starting on a wall)
         for r in range(1, 9):
+
             for c in range(1, 9):
+
+                location = (r, c)
+
+                valtmp = 0.0
+
                 # make sure we are not starting on an obstacle
                 if (r, c) in global obstacles:
                     continue
-                # for each new location from each action (assumiug always 4), get to the new r'c'
-                for proposed_action in range(4):    
-                    # generate locations
-                    valtmp = 0.0
-                    for probable_action in range(3):
-                        location = (r, c)
-                        newLocation = move(location, probable_action)
-                        valtmp += Prob(location, proposed_action, newLocation) * Value(newLocation)
+
+                # for each new location from each action, generate all r'c' states
+                for action in range(4):
+
+                    # determine possible action directions with given action
+                    possible_actions = [action]
+                    if action % 2 == 0:
+                        possible_actions.append(1)
+                        possible_actions.append(3)
+                    else:
+                        possible_actions.append(0)
+                        possible_actions.append(2)
                         
+                    for p_action in possible_actions:
+                        location_prime = move(location, p_action)
+                        valtmp += Prob(action, p_action) * Value(location_prime)
 
-
-
-
-
-                    newLocation = move(a)
-
-
-            global Qnext[][][] = ExpReward(location, action) + gamma * valtmp
+                    global Qnext[r][c][action] = ExpReward(location, action) + gamma * valtmp
 
     return
 
-def Prob(location, action, newLocation):
+def Prob(action, p_action):
     """ params:
-        returns: the probability of reaching newLocation from location if action is taken
+        returns: the probability of reaching a new location from location if an action is taken
     """
     p = 0.09
-    if action == 0 or 1:
-        p = 0.82
-    if action == 2 or 3:
+    if p_action == action:
         p = 0.82
     return p
 
@@ -114,7 +122,7 @@ def Reward(location):
         returns: reward value
     """
     res = 0.0
-    
+
 
     if location in global cake:
         res = donut
