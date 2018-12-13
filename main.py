@@ -87,7 +87,7 @@ def ValueIterate(n):
                         location_prime = move(location, p_action)
                         valtmp += Prob(action, p_action) * Value(location_prime)
 
-                    global Qnext[r][c][action] = ExpReward(location, action) + gamma * valtmp
+                    global Qnext[r][c][action] = ExpReward(location, action, possible_actions) + gamma * valtmp
 
     return
 
@@ -108,14 +108,15 @@ def Value(location):
         value = max(v, Qprev[location[0]][location[1]][a])
     return value
 
-def ExpReward(location, action):
+def ExpReward(location, action, possible_actions):
     """ params:
         returns: reward value
     """
     res = 0.0
-
-
-    return
+    for p_action in possible_actions:
+        newLocation = move(location, p_action)
+        res += Prob(action, p_action) * Reward(newLocation)
+    return res
 
 def Reward(location):
     """ params:
@@ -143,14 +144,27 @@ def GetPolicy(location):
     """ Accepts: <r,c> location tuple
         Returns: action
     """
-
-    return
+    v = -1337
+    for r in range(1,9):
+        for c in range(1,9):        
+            for a in range(4):
+                if global Qprev[r][c][a] > v:
+                    policy_action = a
+                    v = Qprev[r][c][a]
+    return policy_action
 
 def main():
     count = 0
-    userInput = input()
+    iterations = input()
     # capture input
-    while input > 0
+    while iterations > 0:
+        ValueIterate(iterations)
+        count = count + iterations
+        # print count
+        # print vals
+        # print prompt
+        iterations = input()
+
 
 
     print(Qprev)
