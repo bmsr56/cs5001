@@ -61,11 +61,13 @@ def ValueIterate(n):
                 if (r, c) in global obstacles:
                     continue
                 # for each new location from each action (assumiug always 4), get to the new r'c'
-                for initial_action in range(4):    
-                    valtmp = 0.0
+                for proposed_action in range(4):    
                     # generate locations
-                    for second_action in range(3):
-                        valtmp += Prob(location, action, newLocation) * Value(newLocation)
+                    valtmp = 0.0
+                    for probable_action in range(3):
+                        location = (r, c)
+                        newLocation = move(location, probable_action)
+                        valtmp += Prob(location, proposed_action, newLocation) * Value(newLocation)
                         
 
 
@@ -88,9 +90,7 @@ def Prob(location, action, newLocation):
         p = 0.82
     if action == 2 or 3:
         p = 0.82
-
-
-    return
+    return p
 
 def Value(location):
     """ params:
