@@ -7,8 +7,10 @@ from tabulate import tabulate
 import copy
 
 # GLOBAL
+
 gamma = 0.8 # discount rate
-# Actions are stored in this order: UP RIGHT DOWN LEFT
+
+# Actions will be stored in this order in the k dimension: UP RIGHT DOWN LEFT
 Qnext = [[[0 for k in range(4)] for j in range(10)] for i in range(10)]
 Qprev = [[[0 for k in range(4)] for j in range(10)] for i in range(10)]
 
@@ -38,22 +40,19 @@ directionModifier = {
     0: (-1, 0), # up
     1: (0, 1), # right
     2: (1, 0), # down
-    3: (0, -1), # left
+    3: (0, -1) # left
 }
 
-directions = [0, 1, 2, 3] #urdl
-
+directions = {
+    0: '^',
+    1: '>',
+    2: 'v',
+    3: '<'
+}
 
 def move(location, direction):
     global directionModifier
     return tuple(x + y for x, y in zip(location, directionModifier[direction]))
-
-def printValues(values):
-    print('+-------+-------+-------+-------+-------+-------+-------+-------+')
-    for i in values:
-            print('|{}\t|{}\t|{}\t|{}\t|{}\t|{}\t|{}\t|{}\t|'.format(i[0],i[1],i[2] ,i[3],i[4],i[5],i[6],i[7]))
-    print('+-------+-------+-------+-------+-------+-------+-------+-------+\n')
-    return
 
 def ValueIterate(n):
     """ params: number of iterations
@@ -71,7 +70,6 @@ def ValueIterate(n):
             for c in range(1, 9):
 
                 location = (r, c)
-
 
                 # make sure we are not starting on an obstacle
                 if (r, c) in obstacles:
@@ -164,7 +162,7 @@ def GetPolicy(location):
                     v = Qprev[r][c][a]
     return policy_action
 
-def printThatIsh(qtable):
+def printResults(qtable, option):
     global cake
     global donut
     global fire
@@ -185,27 +183,37 @@ def printThatIsh(qtable):
                 tmpRow.append('XXX')
             elif (r, c) in fire:
                 tmpRow.append('FIRE')
-            else:
+            elif option == 'v':
                 tmpRow.append(round(max(qtable[r][c]), 3))
+            elif option == 'p':
+                i = qtable[r][c].index(max(qtable[r][c]))
+                tmpRow.append(directions[i])
         rowsToPrint.append(tmpRow)
+
     print(tabulate(rowsToPrint))
 
 def main():
     global Qprev
     count = 0
-    iterations = int(input())
+    iterations = 1
     # capture input
     while iterations > 0:
-        ValueIterate(iterations)
-        count = count + iterations
-        print('Count: {}'.format(count))
-        printThatIsh(Qprev)
+        print('Enter No of Iterations: ')
         iterations = int(input())
-
-
-
-    # print(Qprev)
+        if iterations == 0:
+            break
+        count = count + iterations
+        print('Value after {} iterations:\n'.format(count))
+        ValueIterate(iterations)
+        printResults(Qprev, 'v')
+    # print the policy
+    print('Policy:\n')
+    printResults(Qprev, 'p')
     return
 
 if __name__ == '__main__':
+    print('CS-5001: HW2')
+    print('Programmer: Ben Simpson')
+    print('Discount Gamma = {}'.format(gamma))
+
     main()
