@@ -3,8 +3,8 @@
 # 12-12-2018
 
 import numpy as np
-from tabulate import tabulate
 import copy
+import pprint
 
 # GLOBAL
 
@@ -162,6 +162,13 @@ def GetPolicy(location):
                     v = Qprev[r][c][a]
     return policy_action
 
+def printFrame(data):
+    print('+-------+-------+-------+-------+-------+-------+-------+-------+')
+    for i in data:
+            print('|{}\t|{}\t|{}\t|{}\t|{}\t|{}\t|{}\t|{}\t|'.format(i[0],i[1],i[2] ,i[3],i[4],i[5],i[6],i[7]))
+    print('+-------+-------+-------+-------+-------+-------+-------+-------+\n')
+    return
+
 def printResults(qtable, option):
     global cake
     global donut
@@ -190,7 +197,7 @@ def printResults(qtable, option):
                 tmpRow.append(directions[i])
         rowsToPrint.append(tmpRow)
 
-    print(tabulate(rowsToPrint))
+    printFrame(rowsToPrint)
 
 def main():
     global Qprev
