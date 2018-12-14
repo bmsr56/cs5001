@@ -63,6 +63,8 @@ def ValueIterate(n):
         global obstacles
         global Qnext
         global Qprev
+        global gamma
+
         # for each valid r,c in grid (8x8 to avoid starting on a wall)
         for r in range(1, 9):
 
@@ -110,9 +112,10 @@ def Value(location):
     """ params:
         returns: a decimal value
     """
+    v = -1337
     for a in range(4):
-        value = max(v, Qprev[location[0]][location[1]][a])
-    return value
+        v = max(v, Qprev[location[0]][location[1]][a])
+    return v
 
 def ExpReward(location, action, possible_actions):
     """ params:
@@ -145,9 +148,6 @@ def Reward(location):
         res = -10.0
     elif location in walls:
         res = -1.0
-    else:
-        print('+++++ Error in Reward +++++')
-        return
     return res
 
 def GetPolicy(location):
@@ -193,15 +193,16 @@ def printThatIsh(qtable):
 
 
 def main():
+    global Qprev
     count = 0
-    iterations = input()
+    iterations = int(input())
     # capture input
     while iterations > 0:
         ValueIterate(iterations)
         count = count + iterations
         print('Count: {}'.format(count))
-        printThatIsh(global Qnext)
-        iterations = input()
+        printThatIsh(Qprev)
+        iterations = int(input())
 
 
 
