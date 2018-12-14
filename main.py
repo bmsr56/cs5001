@@ -4,7 +4,7 @@
 
 import numpy as np
 from tabulate import tabulate
-
+import copy
 
 # GLOBAL
 gamma = 0.8 # discount rate
@@ -72,7 +72,6 @@ def ValueIterate(n):
 
                 location = (r, c)
 
-                valtmp = 0.0
 
                 # make sure we are not starting on an obstacle
                 if (r, c) in obstacles:
@@ -80,9 +79,10 @@ def ValueIterate(n):
 
                 # for each new location from each action, generate all r'c' states
                 for action in range(4):
-
+                    valtmp = 0.0
                     # determine possible action directions with given action
                     possible_actions = [action]
+
                     if action % 2 == 0:
                         possible_actions.append(1)
                         possible_actions.append(3)
@@ -95,7 +95,7 @@ def ValueIterate(n):
                         valtmp += Prob(action, p_action) * Value(location_prime)
 
                     Qnext[r][c][action] = ExpReward(location, action, possible_actions) + gamma * valtmp
-        Qprev = Qnext
+        Qprev = copy.deepcopy(Qnext)
     
     return
 
@@ -186,11 +186,9 @@ def printThatIsh(qtable):
             elif (r, c) in fire:
                 tmpRow.append('FIRE')
             else:
-                tmpRow.append(max(qtable[r][c]))
+                tmpRow.append(round(max(qtable[r][c]), 3))
         rowsToPrint.append(tmpRow)
     print(tabulate(rowsToPrint))
-
-
 
 def main():
     global Qprev
